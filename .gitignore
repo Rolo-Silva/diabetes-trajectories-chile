@@ -1,0 +1,12 @@
+_targets/
+data/raw/
+data/models/
+all_named_models.rds
+*.rds
+*.txt
+*.xlsx
+*.xls
+.Rhistory
+.RData
+.Rproj.user/.DS_Store
+*.Rproj
