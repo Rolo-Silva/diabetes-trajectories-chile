@@ -1,87 +1,21 @@
-# Diabetes Coverage Trajectories — R Project
+# Diabetes Coverage Trajectories in Chilean Primary Care (2011–2023)
 
-Latent class mixed model (LCMM) analysis of diabetic retinopathy screening
-(DRS) and glycaemic control (HbA1c < 7%) coverage trajectories across Chilean
-municipalities, 2011–2023.
+This repository contains the code to reproduce the latent class mixed model
+(LCMM) analysis of diabetic retinopathy screening (DRS) and glycaemic control
+(HbA1c < 7%) coverage trajectories across Chilean municipalities between 2011
+and 2023.
 
-Built with [`targets`](https://books.ropensci.org/targets/) for reproducibility.
-
----
-
-## Project structure
-
-```
-trajectories/
-├── _targets.R                  # Pipeline definition (run with tar_make())
-├── R/
-│   └── Utils.R                 # All pipeline functions
-├── scripts/
-│   └── fit_models.R            # Standalone model fitting (~4 days, run once)
-├── data/
-│   ├── raw/
-│   │   ├── SerieP2011.txt      # Annual series files — see section below
-│   │   ├── SerieP2012.txt
-│   │   ├── ...
-│   │   ├── SerieP2023.txt
-│   │   ├── datosf_2017.xlsx    # 2017 patch file (provided separately)
-│   │   └── DPA2018.xls         # Municipality lookup table (provided separately)
-│   └── models/                 # Individual model .rds files (created by fit_models.R)
-├── all_named_models.rds        # Combined model list (created by fit_models.R)
-└── _targets/                   # targets cache (auto-generated, do not edit)
-```
+The analysis uses [`targets`](https://books.ropensci.org/targets/) to manage
+the data pipeline and ensure reproducibility.
 
 ---
 
-## Input files you need before running
+## Requirements
 
-### 1. Annual series files — `SerieP20XX.txt` (2011–2023)
+### R version
+R ≥ 4.2.0
 
-These are the primary care activity records from DEIS (Chilean Ministry of Health).
-
-- **Source:** https://deis.minsal.cl/ → *Estadísticas* → *Serie de Prestaciones*
-- **Format:** semicolon-delimited `.txt`, one file per year
-- **Size:** several hundred MB per year — large files
-- **Note:** Some years may require a formal data request to DEIS if not available
-  for direct download from the portal.
-
-Place all 13 files in `data/raw/` with the exact names: `SerieP2011.txt` through
-`SerieP2023.txt`.
-
-> ⚠️ **2011–2013 only:** These files have an `id_establecimiento` column with
-> hyphens that requires special handling. This is already managed in the pipeline.
-
-### 2. `datosf_2017.xlsx` — 2017 patch file
-
-The 2017 series file is missing certain diabetes records. This Excel file
-provides the missing December 2017 data for the affected establishments.
-
-- **How to get it:** Contact the project author — this file can be shared directly.
-- **Place it in:** `data/raw/datosf_2017.xlsx`
-
-### 3. `DPA2018.xls` — Municipality lookup table
-
-The División Político-Administrativa (DPA) lookup table, version 2018. Used to
-harmonise municipality codes (`id_comuna`) across the study period, including
-the creation of Ñuble region in 2018.
-
-- **How to get it:** Contact the project author — this file can be shared directly.
-  It is also available from the [INE (Instituto Nacional de Estadísticas)](https://www.ine.gob.cl/).
-- **Place it in:** `data/raw/DPA2018.xls`
-
----
-
-## How to run
-
-### Step 0 — Update file paths
-
-Open `_targets.R` and set `base_dir` to wherever you placed the `data/raw/`
-folder on your machine:
-
-```r
-base_dir <- "/your/path/to/data/raw"
-```
-
-### Step 1 — Install R packages
+### R packages
 
 ```r
 install.packages(c(
@@ -92,85 +26,135 @@ install.packages(c(
 ))
 ```
 
-### Step 2 — Build the data pipeline
+---
 
-This runs everything up to and including `coverage_data`. Fast (~minutes).
+## Input data
+
+Three types of input files are required. **None of them are included in this
+repository** due to file size or access restrictions.
+
+### 1. Annual primary care activity records — `SerieP20XX.txt` (2011–2023)
+
+Thirteen semicolon-delimited files, one per year, containing monthly primary
+care activity records from Chilean public health facilities.
+
+- **Source:** [DEIS — Ministerio de Salud de Chile](https://deis.minsal.cl/)
+  → *Estadísticas* → *Serie de Prestaciones*
+- Some years may require a formal data request to DEIS if not available for
+  direct download.
+- Place all 13 files in `data/raw/` with the exact names `SerieP2011.txt`
+  through `SerieP2023.txt`.
+
+### 2. `datosf_2017.xlsx` — 2017 supplementary patch
+
+The 2017 series file from DEIS is missing December records for a subset of
+establishments. This file provides the missing data.
+
+- **How to obtain:** Contact the corresponding author.
+- Place in `data/raw/datosf_2017.xlsx`.
+
+### 3. `DPA2018.xls` — Municipality lookup table
+
+The División Político-Administrativa (DPA) 2018 lookup table, used to
+harmonise municipality codes across the study period, including the creation
+of Ñuble region in 2018.
+
+- **Source:** [INE — Instituto Nacional de Estadísticas](https://www.ine.gob.cl/),
+  or contact the corresponding author.
+- Place in `data/raw/DPA2018.xls`.
+
+---
+
+## How to reproduce the analysis
+
+### Step 1 — Clone the repository and open the R project
+
+```bash
+git clone https://github.com/YOUR_USERNAME/diabetes-trajectories-chile.git
+```
+
+Open `diabetes-trajectories-chile.Rproj` in RStudio.
+
+### Step 2 — Place input files
+
+Create the required folders and place all input files as described above:
+
+```
+data/
+└── raw/
+    ├── SerieP2011.txt
+    ├── SerieP2012.txt
+    ├── ...
+    ├── SerieP2023.txt
+    ├── datosf_2017.xlsx
+    └── DPA2018.xls
+```
+
+### Step 3 — Set the data path
+
+Open `_targets.R` and update `base_dir` to the absolute path of your `data/raw/`
+folder:
+
+```r
+base_dir <- "/your/path/to/data/raw"
+```
+
+### Step 4 — Run the data pipeline
+
+This builds all targets from raw data through to `coverage_data`. It takes a
+few minutes.
 
 ```r
 targets::tar_make()
 ```
 
-You can inspect what will run first:
+You can inspect the pipeline before running:
 
 ```r
-targets::tar_visnetwork()   # visual dependency graph
-targets::tar_manifest()     # text summary
+targets::tar_visnetwork()  # visual dependency graph
 ```
 
-### Step 3 — Fit the models (manual, ~4 days)
+### Step 5 — Fit the trajectory models
 
-> Skip this step if you have been provided with `all_named_models.rds` directly.
+> ⚠️ This step takes approximately **4 days** on a multi-core machine. If you
+> have been provided with `all_named_models.rds` by the corresponding author,
+> place it in the project root and skip to Step 6.
 
 ```r
 source("scripts/fit_models.R")
 ```
 
-This script:
-- Loads `coverage_data` from the targets cache (`tar_load(coverage_data)`)
-- Fits 140 `hlme` models in parallel (10 structures × 2 outcomes × 7 class solutions)
-- Saves each model individually to `data/models/` as it completes (resumable if interrupted)
-- Writes the combined `all_named_models.rds` to the project root
+This script loads `coverage_data` from the targets cache, fits 140 `hlme`
+models in parallel (10 covariance structures × 2 outcomes × 7 class solutions),
+and saves the results as `all_named_models.rds` in the project root. Individual
+models are saved to `data/models/` as they complete — if the script is
+interrupted, it can be resumed without refitting completed models.
 
-### Step 4 — Run the pipeline again to pick up the models
+### Step 6 — Build the model adequacy table
 
-Once `all_named_models.rds` exists, re-run the pipeline to build the adequacy table:
+Once `all_named_models.rds` is in the project root, re-run the pipeline:
 
 ```r
 targets::tar_make()
 ```
 
-targets tracks `all_named_models.rds` as a file target. It will automatically
-detect if the file has changed and rerun downstream targets.
+targets detects the new file and builds the `model_adequacy_table` target
+automatically.
 
 ---
 
-## Sharing results / running in a new environment
-
-If you want a colleague to reproduce the analysis without re-fitting all models
-(the most common scenario), share these files:
-
-| File | Size | Notes |
-|---|---|---|
-| `all_named_models.rds` | ~1–2 GB | Pre-fitted models — skip `fit_models.R` |
-| `datosf_2017.xlsx` | Small | 2017 patch — contact project author |
-| `DPA2018.xls` | Small | Municipality lookup — contact project author |
-| `SerieP20XX.txt` (×13) | Very large | Download from DEIS or request from project author |
-
-Your colleague then:
-1. Clones or copies the project folder
-2. Places all input files in `data/raw/`
-3. Places `all_named_models.rds` in the project root
-4. Updates `base_dir` in `_targets.R`
-5. Runs `targets::tar_make()` — targets will build everything except the models,
-   then load the pre-fitted `all_named_models.rds` directly
-
----
-
-## Pipeline overview
+## Repository structure
 
 ```
-SerieP2011 ─┐
-SerieP2012  │
-...         ├──► all_series ──► all_series_diabetes ──► coverage_data
-SerieP2023  │                        │
-datosf_2017 │                    dpa2018
-SerieP2017 ─┘
-
-                              [fit_models.R — run manually]
-                                        │
-                              all_named_models.rds  ◄── targets tracks this file
-                                        │
-                              all_named_models ──► model_adequacy_table
+├── _targets.R               # Pipeline definition
+├── R/
+│   └── Utils.R              # All pipeline functions
+├── scripts/
+│   └── fit_models.R         # Standalone model fitting script
+├── data/
+│   ├── raw/                 # Input files (not tracked by git)
+│   └── models/              # Individual model .rds files (not tracked by git)
+└── README.md
 ```
 
 ---
@@ -180,30 +164,29 @@ SerieP2017 ─┘
 | Variable | Description |
 |---|---|
 | `drsc` | Diabetic retinopathy screening coverage (`dm_fo / dm`) |
-| `dgcc` | Glycaemic control coverage (`dm_hg_menor7 / dm`) |
-| `dm` | Number of diabetes patients enrolled in primary care |
-| `year` | Years since 2011 (0–12) |
-| `id` | Municipality numeric ID (`comuna2`) |
+| `dgcc` | Glycaemic control coverage — HbA1c < 7% (`dm_hg_menor7 / dm`) |
+| `dm` | Diabetes patients enrolled in primary care per municipality per year |
+| `year` | Years since 2011 (0 = 2011, 12 = 2023) |
+| `id` | Municipality numeric identifier |
 
-Municipalities in the lowest quintile of diabetes caseload (Q1) are excluded
-from modelling to avoid unstable coverage estimates in very small practices.
+Municipalities in the lowest quintile of diabetes caseload (Q1, pooled across
+all years) are excluded from modelling to avoid unstable coverage estimates in
+very small practices.
 
 ---
 
 ## Notes
 
-- `plyr` is **not** used in this project. The 2017 patch is combined with
-  `dplyr::bind_rows()`. If you load `plyr` elsewhere in your session, load it
-  *before* `dplyr` to avoid masking issues.
-- The quintile cut for Q1 exclusion is computed on the full pooled 2011–2023
-  dataset. A municipality is excluded entirely if its diabetes caseload falls
-  in Q1 in the pooled distribution (not year by year).
-- Model fitting uses `gridsearch(rep = 20)` for all multi-class solutions.
-  `set.seed(1234)` is set both globally and inside each parallel worker.
+- All analysis code uses `dplyr` exclusively. Do not load `plyr` in the same
+  session as it masks key `dplyr` functions.
+- Model fitting uses `gridsearch(rep = 20)` for all multi-class solutions with
+  `set.seed(1234)` set both globally and within each parallel worker.
+- DRS coverage values greater than 1 are capped at 1 prior to modelling.
 
 ---
 
 ## Contact
 
 For access to `datosf_2017.xlsx`, `DPA2018.xls`, or `all_named_models.rds`,
-contact the project author directly.
+or for any questions about the code, please open a
+[GitHub Issue](../../issues) or contact the corresponding author.
