@@ -1,12 +1,114 @@
-_targets/
-data/raw/
-data/models/
-all_named_models.rds
-*.rds
-*.txt
-*.xlsx
-*.xls
+cat > .gitignore << 'EOF'
+# ============================================================
+# R session and history
+# ============================================================
 .Rhistory
 .RData
-.Rproj.user/.DS_Store
+.Ruserdata
+.Rapp.history
+
+# ============================================================
+# RStudio project files
+# ============================================================
+.Rproj.user/
 *.Rproj
+
+# ============================================================
+# targets pipeline cache (binary, can be huge)
+# ============================================================
+_targets/
+_targets.yaml
+_targets_workspace/
+
+# ============================================================
+# Fitted LCMM models (large, must be requested from author)
+# ============================================================
+all_named_models.rds
+data/models/
+
+# ============================================================
+# Raw input data (sensitive / requires DEIS request)
+# ============================================================
+data/raw/
+data/processed/
+indice_desarrollo_comunal_pdf_excel.xlsx
+comunas_pndr.xlsx
+DPA2018.xls
+datosf_2017.xlsx
+SerieP*.txt
+
+# ============================================================
+# Generated outputs and figures
+# ============================================================
+outputs/
+*.png
+*.pdf
+*.tiff
+*.jpeg
+*.jpg
+*.svg
+
+# ============================================================
+# Sensitivity analysis intermediate outputs (legacy from explore.qmd)
+# ============================================================
+sensitivity_outputs/
+sensitivity_outputs_stage2_yearpoint/
+sensitivity_outputs_stage2_yearpoints/
+sens_*.rds
+
+# ============================================================
+# Manuscript and submission documents (not part of code repo)
+# ============================================================
+*.docx
+*.doc
+~$*
+*.pptx
+*.ppt
+BMC submission/
+Diabetic Medicine Submission/
+JPH Submission/
+Figure SF2/
+
+# ============================================================
+# Ad-hoc analysis files (not part of pipeline)
+# ============================================================
+explore_clean.qmd
+explore_trajectories.qmd
+*_files/
+*_cache/
+
+# ============================================================
+# Quarto / RMarkdown rendering artefacts
+# ============================================================
+*.knit.md
+*.utf8.md
+*.html
+
+# ============================================================
+# OS-specific files
+# ============================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ============================================================
+# Editor temporary files
+# ============================================================
+*~
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# ============================================================
+# Python (in case any helper scripts are added)
+# ============================================================
+__pycache__/
+*.pyc
+*.pyo
+EOF
