@@ -206,19 +206,44 @@ list(
   ),
   
   # -------------------------------------------------------------------------
-  # 5. Models — fitted externally (see scripts/fit_models.R)
+  # 5. Trajectory models (LCMM fitting)
+  #
+  # If `all_named_models.rds` exists in the project root, the pipeline
+  # loads it directly (seconds).
+  #
+  # If it does NOT exist, the pipeline runs `scripts/fit_models.R`
+  # automatically (approximately 4 days on a multi-core machine), then
+  # loads the resulting file.
+  #
+  # To force a re-fit on a machine that already has the file:
+  #     file.remove("all_named_models.rds")
+  #     targets::tar_invalidate(all_named_models)
+  #     targets::tar_make()
   # -------------------------------------------------------------------------
-  
-  tar_target(
-    all_named_models_file,
-    "all_named_models.rds",
-    format = "file"
-  ),
   
   tar_target(
     all_named_models,
     {
-      obj <- readRDS(all_named_models_file)
+      rds_path <- "all_named_models.rds"
+      
+      # Explicit dependency on coverage_data so targets resolves it first
+      # (fit_models.R reads it from the targets cache via tar_load).
+      coverage_data_dep <- coverage_data
+      
+      if (!file.exists(rds_path)) {
+        message("[targets] all_named_models.rds not found.")
+        message("[targets] Running scripts/fit_models.R to fit 140 LCMM models.")
+        message("[targets] This will take approximately 4 days on a multi-core machine.")
+        source("scripts/fit_models.R")
+      } else {
+        message("[targets] all_named_models.rds found. Loading existing models.")
+      }
+      
+      if (!file.exists(rds_path))
+        stop("scripts/fit_models.R ran but did not produce all_named_models.rds.")
+      
+      obj <- readRDS(rds_path)
+      
       if (!is.list(obj))
         stop("all_named_models.rds must contain a list of fitted lcmm models.")
       if (is.null(names(obj)))
@@ -234,6 +259,7 @@ list(
       if (length(missing_models) > 0)
         stop(paste0("Missing required models in all_named_models.rds: ",
                     paste(missing_models, collapse = ", ")))
+      
       obj
     }
   ),
@@ -436,6 +462,12 @@ list(
     )
   ),
   
+  # -------------------------------------------------------------------------
+  # 15. Multinomial validation: Supplementary Table ST7
+  # Runs 4 ref_class × 2 outcomes = 8 multinomial models with
+  # pseudo-class MI and Rubin's rules pooling.
+  # -------------------------------------------------------------------------
+  
   tar_target(
     multinom_validation,
     make_multinom_validation(
@@ -462,10 +494,10 @@ list(
   ),
   
   # -------------------------------------------------------------------------
-  # 17. Mixed-effects analysis: Supplementary Table 7
+  # 17. Mixed-effects analysis: Supplementary Table 8
   # Fits MAIN and INTERACTION lmer models for both outcomes; returns the
   # four fits, tidy coefficient tables with Wald 95% CIs, LRT comparison
-  # (main vs interaction), and preformatted Supplementary Table 7.
+  # (main vs interaction), and preformatted Supplementary Table 8.
   # -------------------------------------------------------------------------
   
   tar_target(
@@ -476,4 +508,3 @@ list(
   )
   
 )
-

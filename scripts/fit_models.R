@@ -126,7 +126,7 @@ results <- future_lapply(model_tasks, function(task) {
         rep     = 20,
         maxiter = 1000,
         minit   = one_class_model,
-        lcmm::hlme(
+        hlme(
           fixed   = fixed_formula,
           mixture = mixture_formula,
           random  = random_formula,
