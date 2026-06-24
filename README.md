@@ -1,4 +1,4 @@
-# Trajectories of glycaemic control and diabetic retinopathy screening coverage across Chilean municipalities, 2011–2023: a latent trajectory analysis
+# Diabetes-care coverage under Chile's Explicit Health Guarantees, 2011–2023: a municipal latent-class analysis of glycaemic control and retinopathy screening
 
 This repository contains the code to reproduce the latent class mixed model (LCMM) analysis of diabetic retinopathy screening coverage (DRSC) and effective glycaemic control coverage (EGCC) trajectories across Chilean municipalities, 2011–2023.
 
