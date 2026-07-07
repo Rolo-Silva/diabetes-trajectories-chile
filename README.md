@@ -1,4 +1,4 @@
-# Diabetes-care coverage under Chile's Explicit Health Guarantees, 2011–2023: a municipal latent-class analysis of glycaemic control and retinopathy screening
+# Diabetes-care coverage under Chile’s Explicit Health Guarantees, 2011 to 2023: A longitudinal municipal analysis of equity and adequacy
 
 This repository contains the code to reproduce the latent class mixed model (LCMM) analysis of diabetic retinopathy screening coverage (DRSC) and effective glycaemic control coverage (EGCC) trajectories across Chilean municipalities, 2011–2023.
 
